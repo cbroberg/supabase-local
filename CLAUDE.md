@@ -193,17 +193,33 @@ GITHUB_SECRET=your_client_secret
 
 ### Google OAuth
 
-**Create the OAuth App:**
+**Disabled for local dev.** Google rejects redirect URIs with fake TLDs like `.db`. The callback
+URL `https://supabase.db/auth/v1/callback` fails Google's validation which requires a real public
+TLD (`.com`, `.io`, `.org` etc.). Test Google OAuth on the real deployed app instead.
+
+To enable Google OAuth locally, use a Cloudflare Tunnel to give Ubuntu a real public URL —
+see README.md for setup instructions.
+
+When deploying for real, re-enable in `config.toml` and set the callback URL to your production domain:
+```toml
+[auth.external.google]
+enabled = true
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_SECRET)"
+skip_nonce_check = true
+```
+
+**Create the OAuth App (for production):**
 1. Go to `https://console.cloud.google.com`
 2. Create a new project (or select an existing one)
 3. Go to **APIs & Services** → **OAuth consent screen**
    - User type: **External** → click **Create**
-   - Fill in App name (e.g. `Local Supabase Dev`) and your email for support + developer contact
+   - Fill in App name and your email for support + developer contact
    - Click **Save and Continue** through the remaining steps (no extra scopes needed)
 4. Go to **APIs & Services** → **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
    - Application type: **Web application**
    - Name: `Local Supabase Dev`
-   - Under **Authorized redirect URIs** click **Add URI** and enter: `https://supabase.db/auth/v1/callback`
+   - Under **Authorized redirect URIs** add: `https://yourdomain.com/auth/v1/callback`
    - Click **Create**
 5. Copy the **Client ID** and **Client Secret** from the popup
 
