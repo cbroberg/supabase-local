@@ -107,12 +107,14 @@ Add to `.mcp.json` in any project that should connect to local Supabase:
   "mcpServers": {
     "supabase": {
       "type": "http",
-      "url": "https://supabase.db/mcp"
+      "url": "http://192.168.1.92:54321/mcp"
     }
   }
 }
 ```
 
+> **Why not `https://supabase.db/mcp`?** Node.js ignores the system trust store and won't trust the Caddy CA without `NODE_EXTRA_CA_CERTS`. Bypass the issue entirely by hitting Supabase Kong directly on port 54321 — Docker exposes it on all interfaces, no Caddy or cert setup needed.
+>
 > Use `"type": "http"` — `"sse"` is deprecated. `"enabled"` and `"description"` are not valid fields for HTTP servers.
 
 ---
