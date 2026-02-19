@@ -77,11 +77,19 @@ sudo cp /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt /tmp/ca
 sudo chmod 644 /tmp/caddy-local-ca.crt
 ```
 
-**Trust on Ubuntu:**
+**Trust on Ubuntu (system):**
 ```bash
 sudo cp /tmp/caddy-local-ca.crt /usr/local/share/ca-certificates/caddy-local-ca.crt
 sudo update-ca-certificates
 ```
+
+**Trust on Ubuntu (Chrome):**
+Chrome ignores the system cert store and uses its own NSS database:
+```bash
+sudo apt install -y libnss3-tools
+certutil -d sql:$HOME/.pki/nssdb -A -t "CT,," -n "Caddy Local CA" -i /tmp/caddy-local-ca.crt
+```
+Fully quit and relaunch Chrome after.
 
 **Trust on Mac:**
 ```bash
