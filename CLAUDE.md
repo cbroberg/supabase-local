@@ -39,4 +39,5 @@ Do not commit these values — GitHub secret scanning will block the push.
 - **MCP config** — use `"type": "http"`, not `"sse"` (deprecated). `"enabled"` and `"description"` are invalid fields for HTTP servers and cause errors.
 - **Google OAuth** — rejects fake TLDs like `.db`. Disabled for local dev. Use Cloudflare Tunnel or test on the real deployed app.
 - **Caddy CA cert** — stored at `/var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt`, only readable by root. Use `sudo cp` to export it before `scp`.
+- **Chrome on Ubuntu** — ignores the system cert store. Import the Caddy CA into Chrome's NSS database separately: `sudo apt install -y libnss3-tools && certutil -d sql:$HOME/.pki/nssdb -A -t "CT,," -n "Caddy Local CA" -i /tmp/caddy-local-ca.crt`. Fully quit and relaunch Chrome after.
 - **GitHub secret scanning** — blocks pushes containing Supabase keys, OAuth secrets, or any credential-like strings. Keep secrets in `supabase/.env` (gitignored).
