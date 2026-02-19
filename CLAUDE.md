@@ -174,9 +174,18 @@ enable_confirmations = false
 
 ### GitHub OAuth
 
-1. Go to `https://github.com/settings/developers` → OAuth Apps → New OAuth App
-2. Set Authorization callback URL to `https://supabase.db/auth/v1/callback`
-3. Copy Client ID and Secret into `supabase/.env`:
+**Create the OAuth App:**
+1. Go to `https://github.com/settings/developers`
+2. Click **OAuth Apps** → **New OAuth App**
+3. Fill in:
+   - Application name: `Local Supabase Dev`
+   - Homepage URL: `https://supabase.db`
+   - Authorization callback URL: `https://supabase.db/auth/v1/callback`
+4. Click **Register application**
+5. Copy the **Client ID** shown on the next page
+6. Click **Generate a new client secret** — copy it immediately, it won't be shown again
+
+**Add to `supabase/.env`:**
 ```
 GITHUB_CLIENT_ID=your_client_id
 GITHUB_SECRET=your_client_secret
@@ -184,15 +193,32 @@ GITHUB_SECRET=your_client_secret
 
 ### Google OAuth
 
-1. Go to `https://console.cloud.google.com` → APIs & Services → Credentials → Create OAuth 2.0 Client ID
-2. Set Authorized redirect URI to `https://supabase.db/auth/v1/callback`
-3. Copy Client ID and Secret into `supabase/.env`:
+**Create the OAuth App:**
+1. Go to `https://console.cloud.google.com`
+2. Create a new project (or select an existing one)
+3. Go to **APIs & Services** → **OAuth consent screen**
+   - User type: **External** → click **Create**
+   - Fill in App name (e.g. `Local Supabase Dev`) and your email for support + developer contact
+   - Click **Save and Continue** through the remaining steps (no extra scopes needed)
+4. Go to **APIs & Services** → **Credentials** → **Create Credentials** → **OAuth 2.0 Client ID**
+   - Application type: **Web application**
+   - Name: `Local Supabase Dev`
+   - Under **Authorized redirect URIs** click **Add URI** and enter: `https://supabase.db/auth/v1/callback`
+   - Click **Create**
+5. Copy the **Client ID** and **Client Secret** from the popup
+
+**Add to `supabase/.env`:**
 ```
 GOOGLE_CLIENT_ID=your_client_id
 GOOGLE_SECRET=your_client_secret
 ```
 
 > `supabase/.env` is gitignored. Never commit OAuth secrets — GitHub secret scanning will block the push.
+
+**After adding credentials, restart Supabase:**
+```bash
+supabase stop && supabase start
+```
 
 ## NextJS App
 
