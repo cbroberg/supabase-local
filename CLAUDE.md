@@ -35,7 +35,7 @@ Do not commit these values — GitHub secret scanning will block the push.
 ## Gotchas
 
 - **`.local` TLD** — does not work on macOS (hijacked by mDNS). Use `.db`, `.test` etc.
-- **Node.js CA certs** — Node.js ignores the macOS system trust store. Use `NODE_EXTRA_CA_CERTS=$HOME/caddy-root.crt` in the NextJS dev script.
+- **Node.js CA certs** — Node.js ignores the macOS system trust store. Affects both the NextJS dev script and Claude Code's MCP connections. Add `export NODE_EXTRA_CA_CERTS=$HOME/caddy-root.crt` to `~/.zshrc` so it applies globally, then relaunch Claude Code. Also set it explicitly in the NextJS dev script.
 - **MCP config** — use `"type": "http"`, not `"sse"` (deprecated). `"enabled"` and `"description"` are invalid fields for HTTP servers and cause errors.
 - **Google OAuth** — rejects fake TLDs like `.db`. Disabled for local dev. Use Cloudflare Tunnel or test on the real deployed app.
 - **Caddy CA cert** — stored at `/var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt`, only readable by root. Use `sudo cp` to export it before `scp`.
