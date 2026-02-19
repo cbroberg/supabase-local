@@ -6,11 +6,15 @@ This repo is the **infrastructure side** of a local Supabase development setup t
 
 ```
 [Mac — simulates Fly.io]              [Ubuntu 192.168.1.92 — simulates supabase.com]
-  NextJS app (separate repo)    →       Caddy (port 80)
+  NextJS app (separate repo)    →       Caddy (port 443, HTTPS)
   NEXT_PUBLIC_SUPABASE_URL=              ↓
-    http://supabase.db          →     Supabase Kong (127.0.0.1:54321)
+    https://supabase.db         →     Supabase Kong (127.0.0.1:54321)
                                            ↓
                                        PostgreSQL (127.0.0.1:54322)
+
+  Browser (Mac)                 →     https://studio.supabase.db
+                                           ↓
+                                       Supabase Studio (127.0.0.1:54323)
 ```
 
 ## Ubuntu Machine
@@ -52,7 +56,12 @@ Do not commit these values — even for local dev, GitHub secret scanning will b
 
 ## Caddy Reverse Proxy
 
-Caddy exposes Supabase to the local network so the Mac (or any device on the LAN) can reach it via `http://supabase.db` — simulating `https://yourproject.supabase.co`.
+Caddy exposes Supabase to the local network with HTTPS via its internal CA:
+
+| Domain | Proxies to |
+|--------|-----------|
+| `https://supabase.db` | Supabase Kong (54321) — simulates `https://yourproject.supabase.co` |
+| `https://studio.supabase.db` | Supabase Studio (54323) — simulates the supabase.com dashboard |
 
 ### Caddyfile
 
@@ -71,18 +80,44 @@ sudo systemctl status caddy
 sudo systemctl restart caddy
 ```
 
+### Caddy CA cert (HTTPS trust)
+
+Caddy generates a local CA and issues certs for `supabase.db` and `studio.supabase.db`.
+Each device needs to trust this CA once.
+
+**Export cert (Ubuntu):**
+```bash
+sudo cp /var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt /tmp/caddy-local-ca.crt
+sudo chmod 644 /tmp/caddy-local-ca.crt
+```
+
+**Trust on Ubuntu:**
+```bash
+sudo cp /tmp/caddy-local-ca.crt /usr/local/share/ca-certificates/caddy-local-ca.crt
+sudo update-ca-certificates
+```
+
+**Copy to Mac and trust:**
+```bash
+# On Mac
+scp cb@192.168.1.92:/tmp/caddy-local-ca.crt /tmp/caddy-local-ca.crt
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/caddy-local-ca.crt
+```
+
 ## /etc/hosts
 
 ### Ubuntu (`/etc/hosts`)
 
 ```
 127.0.0.1 supabase.db
+127.0.0.1 studio.supabase.db
 ```
 
 ### Mac (`/etc/hosts`)
 
 ```
 192.168.1.92 supabase.db
+192.168.1.92 studio.supabase.db
 ```
 
 > Note: `.local` TLD does NOT work on macOS — it is hijacked by mDNS/Bonjour.
@@ -90,7 +125,7 @@ sudo systemctl restart caddy
 
 ## MCP Server
 
-The local Supabase instance exposes a built-in MCP server at `http://127.0.0.1:54321/mcp`, accessible from the network via Caddy at `http://supabase.db/mcp`.
+The local Supabase instance exposes a built-in MCP server at `http://127.0.0.1:54321/mcp`, accessible from the network via Caddy at `https://supabase.db/mcp`.
 
 ### `.mcp.json`
 
@@ -101,7 +136,7 @@ Both this repo and the NextJS app repo use the same config:
   "mcpServers": {
     "supabase": {
       "type": "http",
-      "url": "http://supabase.db/mcp"
+      "url": "https://supabase.db/mcp"
     }
   }
 }
@@ -114,7 +149,7 @@ Both this repo and the NextJS app repo use the same config:
 Lives in a **separate repo** on the Mac. Connects to Supabase via:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=http://supabase.db
+NEXT_PUBLIC_SUPABASE_URL=https://supabase.db
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable key from `supabase status`>
 ```
 

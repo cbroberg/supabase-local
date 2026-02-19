@@ -1,10 +1,16 @@
 {
-	# Disable automatic HTTPS — we're simulating a local "cloud" host
-	auto_https off
+	# Caddy issues certs via its internal CA for local HTTPS
+	# Trust the CA cert on each device — see CLAUDE.md for instructions
 }
 
-# Simulates https://yourproject.supabase.co
-# Resolves via /etc/hosts → 127.0.0.1 on Ubuntu, 192.168.1.92 on Mac
-http://supabase.db {
+# Supabase API — simulates https://yourproject.supabase.co
+https://supabase.db {
+	tls internal
 	reverse_proxy 127.0.0.1:54321
+}
+
+# Supabase Studio — simulates the supabase.com dashboard
+https://studio.supabase.db {
+	tls internal
+	reverse_proxy 127.0.0.1:54323
 }
