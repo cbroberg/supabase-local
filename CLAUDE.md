@@ -88,6 +88,27 @@ sudo systemctl restart caddy
 > Note: `.local` TLD does NOT work on macOS — it is hijacked by mDNS/Bonjour.
 > Use `.db`, `.test`, or another custom TLD instead.
 
+## MCP Server
+
+The local Supabase instance exposes a built-in MCP server at `http://127.0.0.1:54321/mcp`, accessible from the network via Caddy at `http://supabase.db/mcp`.
+
+### `.mcp.json`
+
+Both this repo and the NextJS app repo use the same config:
+
+```json
+{
+  "mcpServers": {
+    "supabase": {
+      "type": "http",
+      "url": "http://supabase.db/mcp"
+    }
+  }
+}
+```
+
+> Use `"type": "http"` — the `"sse"` type is deprecated. The `"enabled"` and `"description"` fields are not valid for HTTP/SSE servers and will cause errors.
+
 ## NextJS App
 
 Lives in a **separate repo** on the Mac. Connects to Supabase via:
