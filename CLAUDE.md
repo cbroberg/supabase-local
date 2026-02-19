@@ -6,7 +6,7 @@ This repo is the **infrastructure side** of a local Supabase development setup t
 
 ```
 [Mac — simulates Fly.io]              [Ubuntu 192.168.1.92 — simulates supabase.com]
-  NextJS app (separate repo)    →       Caddy (port 443, HTTPS)
+  NextJS app (separate repo)    →       Caddy (port 443, HTTPS via internal CA)
   NEXT_PUBLIC_SUPABASE_URL=              ↓
     https://supabase.db         →     Supabase Kong (127.0.0.1:54321)
                                            ↓
@@ -82,8 +82,8 @@ sudo systemctl restart caddy
 
 ### Caddy CA cert (HTTPS trust)
 
-Caddy generates a local CA and issues certs for `supabase.db` and `studio.supabase.db`.
-Each device needs to trust this CA once.
+Caddy uses `tls internal` — it generates its own local CA and signs certs for `supabase.db`
+and `studio.supabase.db`. Each device needs to trust this CA once.
 
 **Export cert (Ubuntu):**
 ```bash
@@ -97,11 +97,20 @@ sudo cp /tmp/caddy-local-ca.crt /usr/local/share/ca-certificates/caddy-local-ca.
 sudo update-ca-certificates
 ```
 
-**Copy to Mac and trust:**
+**Copy to Mac and trust (run on Mac):**
 ```bash
-# On Mac
 scp cb@192.168.1.92:/tmp/caddy-local-ca.crt /tmp/caddy-local-ca.crt
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/caddy-local-ca.crt
+```
+
+**Node.js / NextJS on Mac:**
+Node.js ignores the macOS system trust store. Pass the cert explicitly via the dev script:
+```json
+"dev": "NODE_EXTRA_CA_CERTS=$HOME/caddy-root.crt next dev"
+```
+Move the cert to your home dir first:
+```bash
+cp /tmp/caddy-local-ca.crt ~/caddy-root.crt
 ```
 
 ## /etc/hosts
@@ -125,7 +134,8 @@ sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keyc
 
 ## MCP Server
 
-The local Supabase instance exposes a built-in MCP server at `http://127.0.0.1:54321/mcp`, accessible from the network via Caddy at `https://supabase.db/mcp`.
+The local Supabase instance exposes a built-in MCP server at `http://127.0.0.1:54321/mcp`,
+accessible from the network via Caddy at `https://supabase.db/mcp`.
 
 ### `.mcp.json`
 
@@ -142,7 +152,47 @@ Both this repo and the NextJS app repo use the same config:
 }
 ```
 
-> Use `"type": "http"` — the `"sse"` type is deprecated. The `"enabled"` and `"description"` fields are not valid for HTTP/SSE servers and will cause errors.
+> Use `"type": "http"` — the `"sse"` type is deprecated. The `"enabled"` and `"description"`
+> fields are not valid for HTTP/SSE servers and will cause errors.
+
+## Auth Providers
+
+Auth providers are configured in `supabase/config.toml` (not via a dashboard UI like on supabase.com).
+Changes require a Supabase restart:
+```bash
+supabase stop && supabase start
+```
+
+### Email/password
+
+Enabled by default. No email confirmation required in local dev:
+```toml
+[auth.email]
+enable_signup = true
+enable_confirmations = false
+```
+
+### GitHub OAuth
+
+1. Go to `https://github.com/settings/developers` → OAuth Apps → New OAuth App
+2. Set Authorization callback URL to `https://supabase.db/auth/v1/callback`
+3. Copy Client ID and Secret into `supabase/.env`:
+```
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_SECRET=your_client_secret
+```
+
+### Google OAuth
+
+1. Go to `https://console.cloud.google.com` → APIs & Services → Credentials → Create OAuth 2.0 Client ID
+2. Set Authorized redirect URI to `https://supabase.db/auth/v1/callback`
+3. Copy Client ID and Secret into `supabase/.env`:
+```
+GOOGLE_CLIENT_ID=your_client_id
+GOOGLE_SECRET=your_client_secret
+```
+
+> `supabase/.env` is gitignored. Never commit OAuth secrets — GitHub secret scanning will block the push.
 
 ## NextJS App
 
@@ -151,6 +201,11 @@ Lives in a **separate repo** on the Mac. Connects to Supabase via:
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://supabase.db
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<publishable key from `supabase status`>
+```
+
+Dev script must include `NODE_EXTRA_CA_CERTS` so Node.js trusts the Caddy CA:
+```json
+"dev": "NODE_EXTRA_CA_CERTS=$HOME/caddy-root.crt next dev"
 ```
 
 ## Migrations
