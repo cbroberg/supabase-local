@@ -24,7 +24,7 @@ See README.md for full setup instructions.
 |------|-----|
 | Supabase API | https://supabase.db |
 | Supabase Studio | https://studio.supabase.db |
-| MCP server | https://supabase.db/mcp |
+| MCP server | http://192.168.1.92:54321/mcp |
 | Auth callback | https://supabase.db/auth/v1/callback |
 
 ## Credentials
@@ -35,7 +35,7 @@ Do not commit these values — GitHub secret scanning will block the push.
 ## Gotchas
 
 - **`.local` TLD** — does not work on macOS (hijacked by mDNS). Use `.db`, `.test` etc.
-- **Node.js CA certs** — Node.js ignores the macOS system trust store. Affects both the NextJS dev script and Claude Code's MCP connections. Add `export NODE_EXTRA_CA_CERTS=$HOME/caddy-root.crt` to `~/.zshrc` so it applies globally, then relaunch Claude Code. Also set it explicitly in the NextJS dev script.
+- **Node.js CA certs** — Node.js ignores the system trust store on both macOS and Ubuntu. Affects NextJS and Claude Code MCP connections. Set `export NODE_EXTRA_CA_CERTS=$HOME/caddy-root.crt` in `~/.zprofile` for NextJS. For MCP, bypass the issue entirely by pointing directly to Supabase on `http://192.168.1.92:54321/mcp` — no Caddy, no certs needed. Docker exposes port 54321 on all interfaces.
 - **MCP config** — use `"type": "http"`, not `"sse"` (deprecated). `"enabled"` and `"description"` are invalid fields for HTTP servers and cause errors.
 - **Google OAuth** — rejects fake TLDs like `.db`. Disabled for local dev. Use Cloudflare Tunnel or test on the real deployed app.
 - **Caddy CA cert** — stored at `/var/lib/caddy/.local/share/caddy/pki/authorities/local/root.crt`, only readable by root. Use `sudo cp` to export it before `scp`.
