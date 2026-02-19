@@ -1,0 +1,11 @@
+{
+  "name": "supabase-local",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "supabase start",
+    "stop": "supabase stop",
+    "restart": "supabase stop && supabase start",
+    "status": "supabase status"
+  }
+}
