@@ -1,0 +1,10 @@
+{
+	# Disable automatic HTTPS — we're simulating a local "cloud" host
+	auto_https off
+}
+
+# Simulates https://yourproject.supabase.co
+# Resolves via /etc/hosts → 127.0.0.1 on Ubuntu, 192.168.1.92 on Mac
+http://supabase.db {
+	reverse_proxy 127.0.0.1:54321
+}
