@@ -1,6 +1,6 @@
 {
 	# Caddy issues certs via its internal CA for local HTTPS
-	# Trust the CA cert on each device — see CLAUDE.md for instructions
+	# Trust the CA cert on each device — see README.md for instructions
 }
 
 # Supabase API — simulates https://yourproject.supabase.co
