@@ -319,7 +319,7 @@ client_id = "env(GITHUB_CLIENT_ID)"
 secret = "env(GITHUB_SECRET)"
 
 [auth.external.google]
-enabled = true
+enabled = false
 client_id = "env(GOOGLE_CLIENT_ID)"
 secret = "env(GOOGLE_SECRET)"
 skip_nonce_check = true
