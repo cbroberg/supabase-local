@@ -2,7 +2,7 @@
   "mcpServers": {
     "supabase": {
       "type": "http",
-      "url": "https://supabase.db/mcp"
+      "url": "http://192.168.1.92:54321/mcp"
     }
   }
 }
