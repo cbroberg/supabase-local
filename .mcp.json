@@ -1,0 +1,10 @@
+{
+  "mcpServers": {
+    "supabase": {
+      "enabled": true,
+      "type": "sse",
+      "url": "http://supabase.db/mcp",
+      "description": "Local Supabase MCP via Caddy proxy (simulates supabase.com)"
+    }
+  }
+}
