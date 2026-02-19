@@ -143,6 +143,17 @@ Enabled by default. No confirmation required in local dev (`enable_confirmations
 GITHUB_CLIENT_ID=your_client_id
 GITHUB_SECRET=your_client_secret
 ```
+5. Set `redirect_uri` in `supabase/config.toml` — this is critical:
+```toml
+[auth.external.github]
+enabled = true
+client_id = "env(GITHUB_CLIENT_ID)"
+secret = "env(GITHUB_SECRET)"
+redirect_uri = "https://supabase.db/auth/v1/callback"
+```
+6. Restart Supabase: `npm run restart`
+
+> **Why `redirect_uri` must be set explicitly:** Supabase local dev defaults the OAuth callback URL to `http://127.0.0.1:54321/auth/v1/callback` (the internal address). GitHub does an exact string match and rejects the mismatch. The `redirect_uri` field in config.toml overrides this.
 
 ### Google OAuth
 

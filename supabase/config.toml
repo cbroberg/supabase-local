@@ -317,6 +317,7 @@ email_optional = false
 enabled = true
 client_id = "env(GITHUB_CLIENT_ID)"
 secret = "env(GITHUB_SECRET)"
+redirect_uri = "https://supabase.db/auth/v1/callback"
 
 [auth.external.google]
 enabled = false

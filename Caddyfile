@@ -6,11 +6,15 @@
 # Supabase API — simulates https://yourproject.supabase.co
 https://supabase.db {
 	tls internal
-	reverse_proxy 127.0.0.1:54321
+	reverse_proxy 127.0.0.1:54321 {
+		header_up X-Forwarded-Proto https
+	}
 }
 
 # Supabase Studio — simulates the supabase.com dashboard
 https://studio.supabase.db {
 	tls internal
-	reverse_proxy 127.0.0.1:54323
+	reverse_proxy 127.0.0.1:54323 {
+		header_up X-Forwarded-Proto https
+	}
 }
